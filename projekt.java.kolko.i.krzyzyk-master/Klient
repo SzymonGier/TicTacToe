@@ -1,0 +1,646 @@
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.*;
+import java.net.*;
+import java.io.*;
+
+
+
+
+
+
+
+public class Klient extends JFrame implements ActionListener {
+
+    static JButton bGraj, bZasady, bWyjdz, bPowrot, b3x3, b4x4, b5x5;
+    JLabel lPodajWymiar, lZasada1, lZasada2, lZasada3, lZasada4;
+    public static Panel panel;
+    public static Klient okno;
+    public static JLabel lTlo, lKomunikatSerwer, lWygrana;
+    public static int opcjaMapy;
+    public static BufferedReader bf;
+    public static int[][] plansza3x3= new int[3][3];
+    public static int[][] plansza4x4= new int[4][4];
+    public static int[][] plansza5x5= new int[5][5];
+    public static int numerGracza = 0;
+    public static int tura = 0;
+    public static int wynik = 0;
+    public static int przeslij=0;
+
+
+    public Klient() {
+        setSize(915, 935);
+        setTitle("Kółko i krzyżyk");
+        setLayout(null);
+        setLocationRelativeTo(null);
+        ImageIcon zdj = new ImageIcon("tlo.jpg");
+
+        lTlo = new JLabel("", zdj, JLabel.CENTER);
+        lTlo.setBounds(0, 0, 900, 900);
+        add(lTlo);
+
+        bGraj = new JButton("GRAJ");
+        bGraj.setBounds(275, 210, 350, 120);
+        bGraj.setFont(new Font("SansSerif", Font.ITALIC, 50));
+        bGraj.setForeground(new Color(207, 20, 240));
+        bGraj.setBackground(new Color(0, 0, 0));
+        lTlo.add(bGraj);
+        bGraj.addActionListener(this);
+
+        bZasady = new JButton("ZASADY");
+        bZasady.setBounds(275, 350, 350, 120);
+        bZasady.setFont(new Font("SansSerif", Font.ITALIC, 50));
+        bZasady.setForeground(new Color(207, 20, 240));
+        bZasady.setBackground(new Color(0, 0, 0));
+        lTlo.add(bZasady);
+        bZasady.addActionListener(this);
+
+        bWyjdz = new JButton("WYJDŹ");
+        bWyjdz.setBounds(275, 490, 350, 120);
+        bWyjdz.setFont(new Font("SansSerif", Font.ITALIC, 50));
+        bWyjdz.setForeground(new Color(207, 20, 240));
+        bWyjdz.setBackground(new Color(0, 0, 0));
+        lTlo.add(bWyjdz);
+        bWyjdz.addActionListener(this);
+
+        b3x3 = new JButton("3x3");
+        b3x3.setBounds(275, 220, 350, 120);
+        b3x3.setFont(new Font("SansSerif", Font.ITALIC, 50));
+        b3x3.setForeground(new Color(207, 20, 240));
+        b3x3.setBackground(new Color(0, 0, 0));
+        lTlo.add(b3x3);
+        b3x3.setVisible(false);
+        b3x3.addActionListener(this);
+
+        b4x4 = new JButton("4x4");
+        b4x4.setBounds(275, 350, 350, 120);
+        b4x4.setFont(new Font("SansSerif", Font.ITALIC, 50));
+        b4x4.setForeground(new Color(207, 20, 240));
+        b4x4.setBackground(new Color(0, 0, 0));
+        lTlo.add(b4x4);
+        b4x4.setVisible(false);
+        b4x4.addActionListener(this);
+
+        b5x5 = new JButton("5x5");
+        b5x5.setBounds(275, 480, 350, 120);
+        b5x5.setFont(new Font("SansSerif", Font.ITALIC, 50));
+        b5x5.setForeground(new Color(207, 20, 240));
+        b5x5.setBackground(new Color(0, 0, 0));
+        lTlo.add(b5x5);
+        b5x5.setVisible(false);
+        b5x5.addActionListener(this);
+
+        bPowrot = new JButton("POWRÓT");
+        bPowrot.setBounds(275, 610, 350, 120);
+        bPowrot.setFont(new Font("SansSerif ", Font.ITALIC, 50));
+        bPowrot.setForeground(new Color(207, 20, 240));
+        bPowrot.setBackground(new Color(0, 0, 0));
+        lTlo.add(bPowrot);
+        bPowrot.setVisible(false);
+        bPowrot.addActionListener(this);
+
+        lPodajWymiar = new JLabel("WYBIERZ ROZMIAR POLA");
+        lPodajWymiar.setBounds(105, 25, 750, 75);
+        lTlo.add(lPodajWymiar);
+        lPodajWymiar.setFont(new Font("SansSerif", Font.ITALIC, 58));
+        lPodajWymiar.setForeground(new Color(207, 20, 240));
+        lPodajWymiar.setVisible(false);
+
+        lZasada1 = new JLabel("Zaczyna host jako kółko, a kolejną grę rozpoczyna przegrany.");
+        lZasada1.setBounds(165, 185, 865, 30);
+        lTlo.add(lZasada1);
+        lZasada1.setFont(new Font("SansSerif", Font.ITALIC, 22));
+        lZasada1.setForeground(new Color(8, 243, 20));
+        lZasada1.setVisible(false);
+
+        lWygrana = new JLabel("WINNER!");
+        lWygrana.setBounds(330, 55, 865, 55);
+        add(lWygrana);
+        lWygrana.setFont(new Font("SansSerif", Font.ITALIC, 55));
+        lWygrana.setForeground(new Color(8, 243, 20));
+        lWygrana.setVisible(false);
+
+        lZasada2 = new JLabel("3x3- by wygrać, gracz musi ułóżyć 3 takie same figury  w poziomie, pionie lub na ukos.");
+        lZasada2.setBounds(35, 245, 865, 30);
+        lTlo.add(lZasada2);
+        lZasada2.setFont(new Font("SansSerif", Font.ITALIC, 22));
+        lZasada2.setForeground(new Color(234, 92, 15));
+        lZasada2.setVisible(false);
+
+        lZasada3 = new JLabel("4x4- by wygrać, gracz musi ułóżyć 4 takie same figury  w poziomie, pionie lub na ukos.");
+        lZasada3.setBounds(35, 305, 865, 30);
+        lTlo.add(lZasada3);
+        lZasada3.setFont(new Font("SansSerif", Font.ITALIC, 22));
+        lZasada3.setForeground(new Color(6, 217, 232));
+        lZasada3.setVisible(false);
+
+        lZasada4 = new JLabel("5x5- by wygrać, gracz musi ułóżyć 4 takie same figury  w poziomie, pionie lub na ukos.");
+        lZasada4.setBounds(35, 365, 865, 30);
+        lTlo.add(lZasada4);
+        lZasada4.setFont(new Font("SansSerif", Font.ITALIC, 22));
+        lZasada4.setForeground(new Color(239, 217, 2));
+        lZasada4.setVisible(false);
+
+    }
+
+    public static void reset(int rozmiarPlanszy) {
+        for(int i=0;i<rozmiarPlanszy;i++)
+            for(int j=0;j<rozmiarPlanszy;j++)
+                if(rozmiarPlanszy==3) {
+                    plansza3x3[i][j] = 0;
+                }
+                else if(rozmiarPlanszy==4) {
+                    plansza4x4[i][j] = 0;
+                }
+                else if(rozmiarPlanszy==5) {
+                    plansza5x5[i][j] = 0;
+                }
+    }
+
+
+
+    public static void main(String[] args) throws IOException {
+
+        okno = new Klient();
+        okno.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        okno.setResizable(false);
+        okno.setVisible(true);
+
+        Socket s = new Socket("localhost", 4999);
+
+        InputStreamReader in = new InputStreamReader(s.getInputStream());
+        bf = new BufferedReader(in);
+
+        numerGracza = Integer.parseInt(bf.readLine());
+
+        if(numerGracza ==2){
+            bGraj.setEnabled(false);
+        }
+
+        lKomunikatSerwer = new JLabel(bf.readLine());
+        lKomunikatSerwer.setBounds(140, 85, 750, 75);
+        lTlo.add(lKomunikatSerwer);
+        lKomunikatSerwer.setFont(new Font("SansSerif", Font.ITALIC, 35));
+        lKomunikatSerwer.setForeground(new Color(94, 110, 236, 255));
+
+        int delay = 2000;
+        ActionListener taskPerformer = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                lKomunikatSerwer.setVisible(false);
+            }
+        };
+        new javax.swing.Timer(delay, taskPerformer).start();
+
+        PrintWriter pr1 = new PrintWriter(s.getOutputStream());
+
+        //petla do ustawienia mapy na graczu 2
+        while(true) {
+            if ((opcjaMapy == 3 || opcjaMapy == 4 || opcjaMapy == 5 || opcjaMapy == 6) && numerGracza ==1) {
+                pr1.println(opcjaMapy);
+                pr1.flush();
+                break;
+
+            }
+            else if( numerGracza ==2){
+
+                opcjaMapy =(Integer.parseInt(bf.readLine()));
+                zmiana_mapy(opcjaMapy);
+                tura=1;
+                break;
+            }
+
+            else{
+                System.out.println("");
+            }
+        }
+
+
+        //petla gdzie odbywa sie gra
+
+        while(true) {
+
+            if (tura == 1 && przeslij == 0) {
+
+                for (int i = 0; i < opcjaMapy; i++) {
+                    for (int j = 0; j < opcjaMapy; j++) {
+                        if(opcjaMapy ==3) {
+                            plansza3x3[i][j] = Integer.parseInt(bf.readLine());
+                        }
+                        else if(opcjaMapy ==4){
+                            plansza4x4[i][j] = Integer.parseInt(bf.readLine());
+                        }
+                        else if(opcjaMapy ==5){
+                            plansza5x5[i][j] = Integer.parseInt(bf.readLine());
+                        }
+                    }
+                }
+
+                if(opcjaMapy ==3) {
+                    sprawdzenie3x3();
+                }
+                else if(opcjaMapy ==4){
+                    sprawdzenie4x4();
+                }
+                else if(opcjaMapy ==5){
+                    sprawdzenie5x5();
+                }
+
+                okno.repaint();
+                tura = 0;
+
+            } else if (tura == 0 && przeslij == 1) {
+
+                for (int i = 0; i < opcjaMapy; i++) {
+                    for (int j = 0; j < opcjaMapy; j++) {
+                        if(opcjaMapy ==3) {
+                            pr1.println(plansza3x3[i][j]);
+                            pr1.flush();
+                        }
+                        else if(opcjaMapy ==4){
+                            pr1.println(plansza4x4[i][j]);
+                            pr1.flush();
+                        }
+                        else if(opcjaMapy ==5){
+                            pr1.println(plansza5x5[i][j]);
+                            pr1.flush();
+                        }
+                    }
+
+                }
+
+                if(opcjaMapy ==3) {
+                    sprawdzenie3x3();
+                }
+                else if(opcjaMapy ==4){
+                    sprawdzenie4x4();
+                }
+                else if(opcjaMapy ==5){
+                    sprawdzenie5x5();
+                }
+
+
+
+                switch (wynik) {
+                    case 0:
+                        tura = 1;
+                        przeslij = 0;
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+
+                        tura = 1;
+                        przeslij = 0;
+                        wynik = 0;
+                        break;
+                }
+
+
+            } else if (tura == 0 && przeslij == 0) {
+
+                System.out.println("");
+                if(opcjaMapy ==3) {
+                    sprawdzenie3x3();
+                }
+                else if(opcjaMapy ==4){
+                    sprawdzenie4x4();
+                }
+                else if(opcjaMapy ==5){
+                    sprawdzenie5x5();
+                }
+
+
+                if(wynik!=0){
+                    reset(opcjaMapy);
+                    okno.repaint();
+                }
+            }
+
+
+
+        }
+    }
+
+
+
+
+    static void zmiana_mapy(int opcja_mapy){
+
+        switch (opcja_mapy) {
+            case 3:
+
+                lTlo.setVisible(false);
+                panel = new Panel(okno, 3);
+                okno.add(panel);
+                panel.repaint();
+                panel.setVisible(true);
+                panel.setSize(900, 900);
+                break;
+            case 4:
+                lTlo.setVisible(false);
+                panel = new Panel(okno, 4);
+                okno.add(panel);
+                panel.repaint();
+                panel.setVisible(true);
+                panel.setSize(900, 900);
+                break;
+            case 5:
+                lTlo.setVisible(false);
+                panel = new Panel(okno, 5);
+                okno.add(panel);
+                panel.repaint();
+                panel.setVisible(true);
+                panel.setSize(900, 900);
+                break;
+        }
+    }
+
+    public static void sprawdzenie3x3() {
+        if(plansza3x3[0][0]==plansza3x3[0][1]&&plansza3x3[0][1]==plansza3x3[0][2]&&plansza3x3[0][2]== numerGracza        // wiersz 1
+                ||plansza3x3[1][0]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[1][2]&&plansza3x3[1][2]== numerGracza    //wiersz 2
+                ||plansza3x3[2][0]==plansza3x3[2][1]&&plansza3x3[2][1]==plansza3x3[2][2]&&plansza3x3[2][2]== numerGracza    //wiersz 3
+                ||plansza3x3[0][0]==plansza3x3[1][0]&&plansza3x3[1][0]==plansza3x3[2][0]&&plansza3x3[2][0]== numerGracza    //kolumna 1
+                ||plansza3x3[0][1]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[2][1]&&plansza3x3[2][1]== numerGracza    //kolumna 2
+                ||plansza3x3[0][2]==plansza3x3[1][2]&&plansza3x3[1][2]==plansza3x3[2][2]&&plansza3x3[2][2]== numerGracza    //kolumna 3
+                ||plansza3x3[0][0]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[2][2]&&plansza3x3[2][2]== numerGracza    //skos 1
+                ||plansza3x3[0][2]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[2][0]&&plansza3x3[2][0]== numerGracza    //skos 2
+        ) {
+            wynik = numerGracza;    //wygral gracz
+            lWygrana.setVisible(true);
+            int delay = 2000;
+            ActionListener taskPerformer = new ActionListener() {
+                public void actionPerformed(ActionEvent evt) {
+                    lWygrana.setVisible(false);
+                }
+            };
+            new javax.swing.Timer(delay, taskPerformer).start();
+
+
+
+
+        }
+        else if(plansza3x3[0][0]==plansza3x3[0][1]&&plansza3x3[0][1]==plansza3x3[0][2]&&plansza3x3[0][2]!=0&&plansza3x3[0][2]!=numerGracza	        // wiersz 1
+                ||plansza3x3[1][0]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[1][2]&&plansza3x3[1][2]!=0&&plansza3x3[1][2]!=numerGracza		//wiersz 2
+                ||plansza3x3[2][0]==plansza3x3[2][1]&&plansza3x3[2][1]==plansza3x3[2][2]&&plansza3x3[2][2]!=0&&plansza3x3[2][2]!=numerGracza		//wiersz 3
+                ||plansza3x3[0][0]==plansza3x3[1][0]&&plansza3x3[1][0]==plansza3x3[2][0]&&plansza3x3[2][0]!=0&&plansza3x3[2][0]!=numerGracza		//kolumna 1
+                ||plansza3x3[0][1]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[2][1]&&plansza3x3[2][1]!=0&&plansza3x3[2][1]!=numerGracza		//kolumna 2
+                ||plansza3x3[0][2]==plansza3x3[1][2]&&plansza3x3[1][2]==plansza3x3[2][2]&&plansza3x3[2][2]!=0&&plansza3x3[2][2]!=numerGracza		//kolumna 3
+                ||plansza3x3[0][0]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[2][2]&&plansza3x3[2][2]!=0&&plansza3x3[2][2]!=numerGracza		//skos 1
+                ||plansza3x3[0][2]==plansza3x3[1][1]&&plansza3x3[1][1]==plansza3x3[2][0]&&plansza3x3[2][0]!=0&&plansza3x3[2][0]!=numerGracza		//skos 2
+        ) {
+            if (numerGracza == 1) {                                                                //wygral przeciwnik
+                wynik = 2;
+
+            } else {
+                wynik = 1;
+            }
+
+        }
+
+            //czy wszystkie pola niepuste
+
+        else if(plansza3x3[0][0]!=0&&plansza3x3[0][1]!=0&&plansza3x3[0][2]!=0&&plansza3x3[0][2]!=1&&plansza3x3[0][2]!=2		    //wiersz 1
+                &&plansza3x3[1][0]!=0&&plansza3x3[1][1]!=0&&plansza3x3[1][2]!=0&&plansza3x3[1][2]!=1&&plansza3x3[1][2]!=2	    //wiersz 2
+                &&plansza3x3[2][0]!=0&&plansza3x3[2][1]!=0&&plansza3x3[2][2]!=0&&plansza3x3[2][2]!=1&&plansza3x3[2][2]!=2	    //wiersz 3
+        ) {
+            wynik = 3;                                                        //remis
+        }
+        else							//gra trwa dalej
+            wynik=0;
+
+        if(wynik!=0) {			//jesli wynik jest inny niz remis
+            reset(3);
+        }
+    }
+
+
+    public static void sprawdzenie4x4() {
+        if(plansza4x4[0][0]==plansza4x4[0][1]&&plansza4x4[0][1]==plansza4x4[0][2]&&plansza4x4[0][2]==plansza4x4[0][3]&&plansza4x4[0][3]== numerGracza        // wiersz 1
+                ||plansza4x4[1][0]==plansza4x4[1][1]&&plansza4x4[1][1]==plansza4x4[1][2]&&plansza4x4[1][2]==plansza4x4[1][3]&&plansza4x4[1][3]== numerGracza    //wiersz 2
+                ||plansza4x4[2][0]==plansza4x4[2][1]&&plansza4x4[2][1]==plansza4x4[2][2]&&plansza4x4[2][2]==plansza4x4[2][3]&&plansza4x4[2][3]== numerGracza    //wiersz 3
+                ||plansza4x4[3][0]==plansza4x4[3][1]&&plansza4x4[3][1]==plansza4x4[3][2]&&plansza4x4[3][2]==plansza4x4[3][3]&&plansza4x4[3][3]== numerGracza    //wiersz 4
+                ||plansza4x4[0][0]==plansza4x4[1][0]&&plansza4x4[1][0]==plansza4x4[2][0]&&plansza4x4[2][0]==plansza4x4[3][0]&&plansza4x4[3][0]== numerGracza    //kolumna 1
+                ||plansza4x4[0][1]==plansza4x4[1][1]&&plansza4x4[1][1]==plansza4x4[2][1]&&plansza4x4[2][1]==plansza4x4[3][1]&&plansza4x4[3][1]== numerGracza    //kolumna 2
+                ||plansza4x4[0][2]==plansza4x4[1][2]&&plansza4x4[1][2]==plansza4x4[2][2]&&plansza4x4[2][2]==plansza4x4[3][2]&&plansza4x4[3][2]== numerGracza    //kolumna 3
+                ||plansza4x4[0][3]==plansza4x4[1][3]&&plansza4x4[1][3]==plansza4x4[2][3]&&plansza4x4[2][3]==plansza4x4[3][3]&&plansza4x4[3][3]== numerGracza    //kolumna 4
+                ||plansza4x4[0][0]==plansza4x4[1][1]&&plansza4x4[1][1]==plansza4x4[2][2]&&plansza4x4[2][2]==plansza4x4[3][3]&&plansza4x4[3][3]== numerGracza    //skos 1
+                ||plansza4x4[0][3]==plansza4x4[1][2]&&plansza4x4[1][2]==plansza4x4[2][1]&&plansza4x4[2][1]==plansza4x4[3][0]&&plansza4x4[3][0]== numerGracza    //skos 2
+        ) {
+            wynik = numerGracza;                                                                        //wygral gracz
+            lWygrana.setVisible(true);
+            int delay = 2000;
+            ActionListener taskPerformer = new ActionListener() {
+                public void actionPerformed(ActionEvent evt) {
+                    lWygrana.setVisible(false);
+                }
+            };
+            new javax.swing.Timer(delay, taskPerformer).start();
+        }
+        else if(plansza4x4[0][0]==plansza4x4[0][1]&&plansza4x4[0][1]==plansza4x4[0][2]&&plansza4x4[0][2]==plansza4x4[0][3]&&plansza4x4[0][3]!=0		        // wiersz 1
+                ||plansza4x4[1][0]==plansza4x4[1][1]&&plansza4x4[1][1]==plansza4x4[1][2]&&plansza4x4[1][2]==plansza4x4[1][3]&&plansza4x4[1][3]!=0			//wiersz 2
+                ||plansza4x4[2][0]==plansza4x4[2][1]&&plansza4x4[2][1]==plansza4x4[2][2]&&plansza4x4[2][2]==plansza4x4[2][3]&&plansza4x4[2][3]!=0			//wiersz 3
+                ||plansza4x4[3][0]==plansza4x4[3][1]&&plansza4x4[3][1]==plansza4x4[3][2]&&plansza4x4[3][2]==plansza4x4[3][3]&&plansza4x4[3][3]!=0           //wiersz 4
+                ||plansza4x4[0][0]==plansza4x4[1][0]&&plansza4x4[1][0]==plansza4x4[2][0]&&plansza4x4[2][0]==plansza4x4[3][0]&&plansza4x4[3][0]!=0			//kolumna 1
+                ||plansza4x4[0][1]==plansza4x4[1][1]&&plansza4x4[1][1]==plansza4x4[2][1]&&plansza4x4[2][1]==plansza4x4[3][1]&&plansza4x4[3][1]!=0			//kolumna 2
+                ||plansza4x4[0][2]==plansza4x4[1][2]&&plansza4x4[1][2]==plansza4x4[2][2]&&plansza4x4[2][2]==plansza4x4[3][2]&&plansza4x4[3][2]!=0			//kolumna 3
+                ||plansza4x4[0][3]==plansza4x4[1][3]&&plansza4x4[1][3]==plansza4x4[2][3]&&plansza4x4[2][3]==plansza4x4[3][3]&&plansza4x4[3][3]!=0       	//kolumna 4
+                ||plansza4x4[0][0]==plansza4x4[1][1]&&plansza4x4[1][1]==plansza4x4[2][2]&&plansza4x4[2][2]==plansza4x4[3][3]&&plansza4x4[3][3]!=0			//skos 1
+                ||plansza4x4[0][3]==plansza4x4[1][2]&&plansza4x4[1][2]==plansza4x4[2][1]&&plansza4x4[2][1]==plansza4x4[3][0]&&plansza4x4[3][0]!=0			//skos 2
+        ) {
+            if (numerGracza == 1)                                                                        //wygral przeciwnik
+                wynik = 2;
+            else
+                wynik = 1;
+        }
+            //czy wszystkie pola niepuste
+        else if(plansza4x4[0][0]!=0&&plansza4x4[0][1]!=0&&plansza4x4[0][2]!=0&&plansza4x4[0][3]!=0	//wiersz 1
+                &&plansza4x4[1][0]!=0&&plansza4x4[1][1]!=0&&plansza4x4[1][2]!=0&&plansza4x4[1][3]!=0 //wiersz 2
+                &&plansza4x4[2][0]!=0&&plansza4x4[2][1]!=0&&plansza4x4[2][2]!=0&&plansza4x4[2][3]!=0 //wiersz 3
+                &&plansza4x4[3][0]!=0&&plansza4x4[3][1]!=0&&plansza4x4[3][2]!=0&&plansza4x4[3][3]!=0 //wiersz 4
+        )
+            wynik=3;														//remis
+
+        else							//gra trwa dalej
+            wynik=0;
+
+        if(wynik!=0) {			//jesli wynik jest inny niz remis
+            reset(4);
+        }
+    }
+
+    public static void sprawdzenie5x5() {
+        if(plansza5x5[0][0]==plansza5x5[0][1]&&plansza5x5[0][1]==plansza5x5[0][2]&&plansza5x5[0][2]==plansza5x5[0][3]&&plansza5x5[0][3]== numerGracza                // wiersz 1, 1. mozliwosc
+                ||plansza5x5[0][1]==plansza5x5[0][2]&&plansza5x5[0][2]==plansza5x5[0][3]&&plansza5x5[0][3]==plansza5x5[0][4]&&plansza5x5[0][4]== numerGracza        // wiersz 1, 2. mozliwosc
+                ||plansza5x5[1][0]==plansza5x5[1][1]&&plansza5x5[1][1]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[1][3]&&plansza5x5[1][3]== numerGracza        // wiersz 2, 1. mozliwosc
+                ||plansza5x5[1][1]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[1][3]&&plansza5x5[1][3]==plansza5x5[1][4]&&plansza5x5[1][4]== numerGracza        // wiersz 2, 2. mozliwosc
+                ||plansza5x5[2][0]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[2][3]&&plansza5x5[2][3]== numerGracza        // wiersz 3, 1. mozliwosc
+                ||plansza5x5[2][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[2][4]&&plansza5x5[2][4]== numerGracza        // wiersz 3, 2. mozliwosc
+                ||plansza5x5[3][0]==plansza5x5[3][1]&&plansza5x5[3][1]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[3][3]&&plansza5x5[3][3]== numerGracza        // wiersz 4, 1. mozliwosc
+                ||plansza5x5[3][1]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[3][3]&&plansza5x5[3][3]==plansza5x5[3][4]&&plansza5x5[3][4]== numerGracza        // wiersz 4, 2. mozliwosc
+                ||plansza5x5[4][0]==plansza5x5[4][1]&&plansza5x5[4][1]==plansza5x5[4][2]&&plansza5x5[4][2]==plansza5x5[4][3]&&plansza5x5[4][3]== numerGracza        // wiersz 5, 1. mozliwosc
+                ||plansza5x5[4][1]==plansza5x5[4][2]&&plansza5x5[4][2]==plansza5x5[4][3]&&plansza5x5[4][3]==plansza5x5[4][4]&&plansza5x5[4][4]== numerGracza        // wiersz 5, 2. mozliwosc
+                ||plansza5x5[0][0]==plansza5x5[1][0]&&plansza5x5[1][0]==plansza5x5[2][0]&&plansza5x5[2][0]==plansza5x5[3][0]&&plansza5x5[3][0]== numerGracza        // kolumna 1, 1. mozliwosc
+                ||plansza5x5[1][0]==plansza5x5[2][0]&&plansza5x5[2][0]==plansza5x5[3][0]&&plansza5x5[3][0]==plansza5x5[4][0]&&plansza5x5[4][0]== numerGracza        // kolumna 1, 2. mozliwosc
+                ||plansza5x5[0][1]==plansza5x5[1][1]&&plansza5x5[1][1]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][1]&&plansza5x5[3][1]== numerGracza        // kolumna 2, 1. mozliwosc
+                ||plansza5x5[1][1]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][1]&&plansza5x5[3][1]==plansza5x5[4][1]&&plansza5x5[4][1]== numerGracza        // kolumna 2, 2. mozliwosc
+                ||plansza5x5[0][2]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][2]&&plansza5x5[3][2]== numerGracza        // kolumna 3, 1. mozliwosc
+                ||plansza5x5[1][2]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[4][2]&&plansza5x5[4][2]== numerGracza        // kolumna 3, 2. mozliwosc
+                ||plansza5x5[0][3]==plansza5x5[1][3]&&plansza5x5[1][3]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][3]&&plansza5x5[3][3]== numerGracza        // kolumna 4, 1. mozliwosc
+                ||plansza5x5[1][3]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][3]&&plansza5x5[3][3]==plansza5x5[4][3]&&plansza5x5[4][3]== numerGracza        // kolumna 4, 2. mozliwosc
+                ||plansza5x5[0][4]==plansza5x5[1][4]&&plansza5x5[1][4]==plansza5x5[2][4]&&plansza5x5[2][4]==plansza5x5[3][4]&&plansza5x5[3][4]== numerGracza        // kolumna 5, 1. mozliwosc
+                ||plansza5x5[1][4]==plansza5x5[2][4]&&plansza5x5[2][4]==plansza5x5[3][4]&&plansza5x5[3][4]==plansza5x5[4][4]&&plansza5x5[4][4]== numerGracza        // kolumna 5, 2. mozliwosc
+                ||plansza5x5[0][0]==plansza5x5[1][1]&&plansza5x5[1][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][3]&&plansza5x5[3][3]== numerGracza        // skos 1, 1. mozliwosc
+                ||plansza5x5[1][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][3]&&plansza5x5[3][3]==plansza5x5[4][4]&&plansza5x5[4][4]== numerGracza        // skos 1, 2. mozliwosc
+                ||plansza5x5[0][4]==plansza5x5[1][3]&&plansza5x5[1][3]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][1]&&plansza5x5[3][1]== numerGracza        // skos 2, 1. mozliwosc
+                ||plansza5x5[1][3]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][1]&&plansza5x5[3][1]==plansza5x5[4][0]&&plansza5x5[4][0]== numerGracza        // skos 2, 2. mozliwosc
+                ||plansza5x5[1][0]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[4][3]&&plansza5x5[4][3]== numerGracza        // skos 3, 1. mozliwosc
+                ||plansza5x5[0][1]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][4]&&plansza5x5[3][4]== numerGracza        // skos 3, 2. mozliwosc
+                ||plansza5x5[0][3]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][0]&&plansza5x5[3][0]== numerGracza        // skos 4, 1. mozliwosc
+                ||plansza5x5[1][4]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[4][1]&&plansza5x5[4][1]== numerGracza        // skos 4, 2. mozliwosc
+        ) {
+            wynik = numerGracza;    //wygral gracz
+            lWygrana.setVisible(true);
+            int delay = 2000;
+            ActionListener taskPerformer = new ActionListener() {
+                public void actionPerformed(ActionEvent evt) {
+                    lWygrana.setVisible(false);
+                }
+            };
+            new javax.swing.Timer(delay, taskPerformer).start();
+        }
+        else  if(plansza5x5[0][0]==plansza5x5[0][1]&&plansza5x5[0][1]==plansza5x5[0][2]&&plansza5x5[0][2]==plansza5x5[0][3]&&plansza5x5[0][3]!=0	        // wiersz 1, 1. mozliwosc
+                ||plansza5x5[0][1]==plansza5x5[0][2]&&plansza5x5[0][2]==plansza5x5[0][3]&&plansza5x5[0][3]==plansza5x5[0][4]&&plansza5x5[0][4]!=0			// wiersz 1, 2. mozliwosc
+                ||plansza5x5[1][0]==plansza5x5[1][1]&&plansza5x5[1][1]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[1][3]&&plansza5x5[1][3]!=0		    // wiersz 2, 1. mozliwosc
+                ||plansza5x5[1][1]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[1][3]&&plansza5x5[1][3]==plansza5x5[1][4]&&plansza5x5[1][4]!=0	        // wiersz 2, 2. mozliwosc
+                ||plansza5x5[2][0]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[2][3]&&plansza5x5[2][3]!=0		    // wiersz 3, 1. mozliwosc
+                ||plansza5x5[2][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[2][4]&&plansza5x5[2][4]!=0		    // wiersz 3, 2. mozliwosc
+                ||plansza5x5[3][0]==plansza5x5[3][1]&&plansza5x5[3][1]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[3][3]&&plansza5x5[3][3]!=0	    	// wiersz 4, 1. mozliwosc
+                ||plansza5x5[3][1]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[3][3]&&plansza5x5[3][3]==plansza5x5[3][4]&&plansza5x5[3][4]!=0	    	// wiersz 4, 2. mozliwosc
+                ||plansza5x5[4][0]==plansza5x5[4][1]&&plansza5x5[4][1]==plansza5x5[4][2]&&plansza5x5[4][2]==plansza5x5[4][3]&&plansza5x5[4][3]!=0	    	// wiersz 5, 1. mozliwosc
+                ||plansza5x5[4][1]==plansza5x5[4][2]&&plansza5x5[4][2]==plansza5x5[4][3]&&plansza5x5[4][3]==plansza5x5[4][4]&&plansza5x5[4][4]!=0	     	// wiersz 5, 2. mozliwosc
+                ||plansza5x5[0][0]==plansza5x5[1][0]&&plansza5x5[1][0]==plansza5x5[2][0]&&plansza5x5[2][0]==plansza5x5[3][0]&&plansza5x5[3][0]!=0		    // kolumna 1, 1. mozliwosc
+                ||plansza5x5[1][0]==plansza5x5[2][0]&&plansza5x5[2][0]==plansza5x5[3][0]&&plansza5x5[3][0]==plansza5x5[4][0]&&plansza5x5[4][0]!=0		    // kolumna 1, 2. mozliwosc
+                ||plansza5x5[0][1]==plansza5x5[1][1]&&plansza5x5[1][1]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][1]&&plansza5x5[3][1]!=0	        // kolumna 2, 1. mozliwosc
+                ||plansza5x5[1][1]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][1]&&plansza5x5[3][1]==plansza5x5[4][1]&&plansza5x5[4][1]!=0	        // kolumna 2, 2. mozliwosc
+                ||plansza5x5[0][2]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][2]&&plansza5x5[3][2]!=0		    // kolumna 3, 1. mozliwosc
+                ||plansza5x5[1][2]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[4][2]&&plansza5x5[4][2]!=0		    // kolumna 3, 2. mozliwosc
+                ||plansza5x5[0][3]==plansza5x5[1][3]&&plansza5x5[1][3]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][3]&&plansza5x5[3][3]!=0		    // kolumna 4, 1. mozliwosc
+                ||plansza5x5[1][3]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][3]&&plansza5x5[3][3]==plansza5x5[4][3]&&plansza5x5[4][3]!=0		    // kolumna 4, 2. mozliwosc
+                ||plansza5x5[0][4]==plansza5x5[1][4]&&plansza5x5[1][4]==plansza5x5[2][4]&&plansza5x5[2][4]==plansza5x5[3][4]&&plansza5x5[3][4]!=0		    // kolumna 5, 1. mozliwosc
+                ||plansza5x5[1][4]==plansza5x5[2][4]&&plansza5x5[2][4]==plansza5x5[3][4]&&plansza5x5[3][4]==plansza5x5[4][4]&&plansza5x5[4][4]!=0	     	// kolumna 5, 2. mozliwosc
+                ||plansza5x5[0][0]==plansza5x5[1][1]&&plansza5x5[1][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][3]&&plansza5x5[3][3]!=0		    // skos 1, 1. mozliwosc
+                ||plansza5x5[1][1]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][3]&&plansza5x5[3][3]==plansza5x5[4][4]&&plansza5x5[4][4]!=0		    // skos 1, 2. mozliwosc
+                ||plansza5x5[0][4]==plansza5x5[1][3]&&plansza5x5[1][3]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][1]&&plansza5x5[3][1]!=0		    // skos 2, 1. mozliwosc
+                ||plansza5x5[1][3]==plansza5x5[2][2]&&plansza5x5[2][2]==plansza5x5[3][1]&&plansza5x5[3][1]==plansza5x5[4][0]&&plansza5x5[4][0]!=0		    // skos 2, 2. mozliwosc
+                ||plansza5x5[1][0]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[4][3]&&plansza5x5[4][3]!=0           // skos 3, 1. mozliwosc
+                ||plansza5x5[0][1]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][4]&&plansza5x5[3][4]!=0           // skos 3, 2. mozliwosc
+                ||plansza5x5[0][3]==plansza5x5[1][2]&&plansza5x5[1][2]==plansza5x5[2][1]&&plansza5x5[2][1]==plansza5x5[3][0]&&plansza5x5[3][0]!=0           // skos 4, 1. mozliwosc
+                ||plansza5x5[1][4]==plansza5x5[2][3]&&plansza5x5[2][3]==plansza5x5[3][2]&&plansza5x5[3][2]==plansza5x5[4][1]&&plansza5x5[4][1]!=0           // skos 4, 2. mozliwosc
+        ) {
+            if (numerGracza == 1)                                                                        //wygral przeciwnik
+                wynik = 2;
+            else
+                wynik = 1;
+        }
+            //czy wszystkie pola niepuste
+        else if(plansza5x5[0][0]!=0&&plansza5x5[0][1]!=0&&plansza5x5[0][2]!=0&&plansza5x5[0][3]!=0&&plansza5x5[0][4]!=0	    //wiersz 1
+                &&plansza5x5[1][0]!=0&&plansza5x5[1][1]!=0&&plansza5x5[1][2]!=0&&plansza5x5[1][3]!=0&&plansza5x5[1][4]!=0   //wiersz 2
+                &&plansza5x5[2][0]!=0&&plansza5x5[2][1]!=0&&plansza5x5[2][2]!=0&&plansza5x5[2][3]!=0&&plansza5x5[2][4]!=0   //wiersz 3
+                &&plansza5x5[3][0]!=0&&plansza5x5[3][1]!=0&&plansza5x5[3][2]!=0&&plansza5x5[3][3]!=0&&plansza5x5[3][4]!=0   //wiersz 4
+                &&plansza5x5[4][0]!=0&&plansza5x5[4][1]!=0&&plansza5x5[4][2]!=0&&plansza5x5[4][3]!=0&&plansza5x5[4][4]!=0   //wiersz 5
+        )
+            wynik=3;														//remis
+
+        else							//gra trwa dalej
+            wynik=0;
+
+        if(wynik!=0) {			//jesli wynik jest inny niz remis
+            reset(5);
+        }
+    }
+
+
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+
+        Object zrodlo = actionEvent.getSource();
+        if (zrodlo == bGraj) {
+
+            bGraj.setVisible(false);
+            bZasady.setVisible(false);
+            bWyjdz.setVisible(false);
+            b3x3.setVisible(true);
+            b4x4.setVisible(true);
+            b5x5.setVisible(true);
+            bPowrot.setVisible(true);
+            lPodajWymiar.setVisible(true);
+
+        }
+        else if (zrodlo == bZasady) {
+
+            bZasady.setVisible(false);
+            bGraj.setVisible(false);
+            bWyjdz.setVisible(false);
+            lZasada1.setVisible(true);
+            lZasada2.setVisible(true);
+            lZasada3.setVisible(true);
+            lZasada4.setVisible(true);
+            bPowrot.setVisible(true);
+
+
+        }
+        else if(zrodlo== bWyjdz){
+            dispose();
+        }
+        else if(zrodlo== bPowrot){
+            b3x3.setVisible(false);
+            b4x4.setVisible(false);
+            b5x5.setVisible(false);
+            bPowrot.setVisible(false);
+            bGraj.setVisible(true);
+            bZasady.setVisible(true);
+            lZasada1.setVisible(false);
+            lZasada2.setVisible(false);
+            lZasada3.setVisible(false);
+            lZasada4.setVisible(false);
+            bWyjdz.setVisible(true);
+            lPodajWymiar.setVisible(false);
+        }
+        else if(zrodlo==b3x3){
+
+            lTlo.setVisible(false);
+            panel =new Panel(okno, 3);
+            add(panel);
+            panel.repaint();
+            panel.setVisible(true);
+            panel.setSize(915,935);
+            opcjaMapy =3;
+
+
+        }
+        else if(zrodlo==b4x4){
+            lTlo.setVisible(false);
+            panel=new Panel(okno,4);
+            add(panel);
+            panel.repaint();
+            panel.setVisible(true);
+            panel.setSize(915,935);
+            opcjaMapy =4;
+
+
+        }
+        else if(zrodlo==b5x5) {
+            lTlo.setVisible(false);
+            panel = new Panel(okno, 5);
+            add(panel);
+            panel.repaint();
+            panel.setVisible(true);
+            panel.setSize(915, 935);
+            opcjaMapy = 5;
+
+        }
+    }
+}
+

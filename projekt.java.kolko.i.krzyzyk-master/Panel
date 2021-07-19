@@ -1,0 +1,110 @@
+import javax.swing.JPanel;
+import javax.swing.ImageIcon;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+public class Panel extends JPanel implements MouseListener{
+
+    private Klient okno ;
+    private ImageIcon pole;
+    private int rozmiarPola;
+
+
+    public Panel(Klient okno, int rozmiarPola) {
+        this.okno = okno;
+        addMouseListener(this);
+        this.rozmiarPola=rozmiarPola;
+    }
+
+    public void paint(Graphics g)
+    {
+        for(int i=0;i<rozmiarPola;i++){
+            for(int j=0;j<rozmiarPola;j++){
+                if(rozmiarPola==3) {
+                    if (Klient.plansza3x3[i][j] == 0) {
+                        pole = new ImageIcon("pole3x3.jpg");
+                        pole.paintIcon(this, g, i * 300, j * 300);
+                    } else if (Klient.plansza3x3[i][j] == 1) {
+                        pole = new ImageIcon("pole3x3 - Kolko.jpg");
+                        pole.paintIcon(this, g, i * 300, j * 300);
+                    } else if (Klient.plansza3x3[i][j] == 2) {
+                        pole = new ImageIcon("pole3x3 - Krzyzyk.jpg");
+                        pole.paintIcon(this, g, i * 300, j * 300);
+                    }
+                }
+                else if(rozmiarPola==4){
+                    if(Klient.plansza4x4[i][j]==0) {
+                        pole = new ImageIcon("pole4x4.jpg");
+                        pole.paintIcon(this,g,i*225,j*225);
+                    }
+                    else if(Klient.plansza4x4[i][j]==1){
+                        pole = new ImageIcon("pole4x4 - Kolko.jpg");
+                        pole.paintIcon(this,g,i*225,j*225);
+                    }
+                    else if(Klient.plansza4x4[i][j]==2){
+                        pole = new ImageIcon("pole4x4 - Krzyzyk.jpg");
+                        pole.paintIcon(this,g,i*225,j*225);
+                    }
+                }
+                else if(rozmiarPola==5){
+                    if(Klient.plansza5x5[i][j]==0) {
+                        pole = new ImageIcon("pole5x5.jpg");
+                        pole.paintIcon(this, g, i * 180, j * 180);
+                    }
+                    else if(Klient.plansza5x5[i][j]==1){
+                        pole = new ImageIcon("pole5x5 - Kolko.jpg");
+                        pole.paintIcon(this, g, i * 180, j * 180);
+                    }
+                    else if(Klient.plansza5x5[i][j]==2){
+                        pole = new ImageIcon("pole5x5 - Krzyzyk.jpg");
+                        pole.paintIcon(this, g, i * 180, j * 180);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {
+        if(rozmiarPola==3 && (Klient.tura==0 && Klient.plansza3x3[mouseEvent.getX()/300][mouseEvent.getY()/300]==0)){
+            Klient.plansza3x3[mouseEvent.getX()/300][mouseEvent.getY()/300]= Klient.numerGracza;
+            okno.repaint();
+            Klient.przeslij=1;
+        }
+        else if(rozmiarPola==4 && (Klient.tura==0 && Klient.plansza4x4[mouseEvent.getX()/225][mouseEvent.getY()/225]==0)){
+            Klient.plansza4x4[mouseEvent.getX()/225][mouseEvent.getY()/225]= Klient.numerGracza;
+            okno.repaint();
+            Klient.przeslij=1;
+        }
+        else if(rozmiarPola==5 && (Klient.tura==0 && Klient.plansza5x5[mouseEvent.getX()/180][mouseEvent.getY()/180]==0)){
+            Klient.plansza5x5[mouseEvent.getX()/180][mouseEvent.getY()/180]= Klient.numerGracza;
+            okno.repaint();
+            Klient.przeslij=1;
+        }
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {
+
+    }
+}
